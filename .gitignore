@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+.env
+*.egg-info/
+dist/
+.pytest_cache/
+node_modules/
+.next/
+.localstack/
+.serverless/
+.DS_Store

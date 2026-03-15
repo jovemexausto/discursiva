@@ -1,0 +1,13 @@
+services:
+  frontend:
+    image: node:20-alpine
+    working_dir: /app/apps/frontend
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../:/app
+    environment:
+      INTERNAL_API_URL: http://api:8000
+    depends_on:
+      - api

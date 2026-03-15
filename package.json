@@ -1,0 +1,16 @@
+{
+  "name": "discursiva-serverless",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Serverless Framework plugins for Discursiva",
+  "devDependencies": {
+    "serverless": "^3",
+    "serverless-localstack": "^1.2",
+    "serverless-offline": "^13",
+    "serverless-offline-sqs": "^8"
+  },
+  "scripts": {
+    "deploy:local": "serverless deploy --stage local",
+    "remove:local": "serverless remove --stage local"
+  }
+}

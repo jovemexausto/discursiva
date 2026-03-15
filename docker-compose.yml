@@ -1,0 +1,41 @@
+services:
+  postgres:
+    extends:
+      file: packages/infra/compose.yml
+      service: postgres
+
+  localstack:
+    extends:
+      file: packages/infra/compose.yml
+      service: localstack
+
+  api:
+    extends:
+      file: apps/api/compose.yml
+      service: api
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+
+  worker:
+    extends:
+      file: apps/worker/compose.yml
+      service: worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+
+  frontend:
+    extends:
+      file: apps/frontend/compose.yml
+      service: frontend
+    depends_on:
+      - api
+
+volumes:
+  pg_data:
+  ls_data:

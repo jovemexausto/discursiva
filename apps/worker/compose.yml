@@ -1,0 +1,17 @@
+services:
+  worker:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    working_dir: /app
+    environment:
+      UV_PROJECT_ENVIRONMENT: /opt/venv
+    command: >
+      sh -c "uv sync --quiet &&
+             uv run python -m worker.main"
+    volumes:
+      - ../../:/app
+    env_file: ../../.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy

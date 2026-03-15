@@ -1,0 +1,6 @@
+from typing import Protocol
+
+
+class StoragePort(Protocol):
+    async def upload(self, key: str, content: str) -> str: ...
+    async def download(self, key: str) -> str: ...

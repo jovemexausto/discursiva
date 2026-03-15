@@ -1,0 +1,142 @@
+service: discursiva
+
+frameworkVersion: "3"
+
+plugins:
+  - serverless-offline
+  - serverless-localstack
+  - serverless-offline-sqs
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  stage: ${opt:stage, 'local'}
+  memorySize: 256
+  timeout: 29
+
+  environment:
+    DATABASE_URL: ${env:DATABASE_URL}
+    S3_BUCKET: ${self:custom.s3Bucket}
+    SQS_QUEUE_URL: ${self:custom.sqsQueueUrl}
+    S3_ENDPOINT_URL: ${self:custom.awsEndpoint}
+    SQS_ENDPOINT_URL: ${self:custom.awsEndpoint}
+    STAGE: ${self:provider.stage}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+          Resource: "arn:aws:s3:::${self:custom.s3Bucket}/*"
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+          Resource: "arn:aws:sqs:${self:provider.region}:*:corrections-queue"
+
+custom:
+  s3Bucket: discursiva-submissions
+  sqsQueueUrl: "http://localhost:4566/000000000000/corrections-queue"
+  awsEndpoint: "http://localhost:4566"
+
+  localstack:
+    stages:
+      - local
+    host: http://localhost
+    edgePort: 4566
+    autostart: false
+
+  serverless-offline-sqs:
+    autoCreate: true
+    apiVersion: "2012-11-05"
+    endpoint: http://localhost:4566
+    region: us-east-1
+    accessKeyId: test
+    secretAccessKey: test
+    skipCacheInvalidation: false
+
+  serverless-offline:
+    httpPort: 8000
+    lambdaPort: 8002
+    noPrependStageInUrl: true
+
+functions:
+
+  createSubmission:
+    handler: apps/api/src/api/handler.create
+    description: "Recebe texto, salva no S3, cria job PENDING no Postgres, publica na fila"
+    events:
+      - http:
+          path: /submissions
+          method: post
+          cors: true
+
+  getSubmission:
+    handler: apps/api/src/api/handler.get_by_id
+    description: "Retorna detalhes + status + nota de uma submissão"
+    events:
+      - http:
+          path: /submissions/{id}
+          method: get
+          cors: true
+
+  listSubmissions:
+    handler: apps/api/src/api/handler.list_by_student
+    description: "Lista submissões por student_id com paginação simples"
+    events:
+      - http:
+          path: /submissions
+          method: get
+          cors: true
+
+  worker:
+    handler: apps/worker/src/worker/handler.process
+    description: "Consome fila SQS, corrige a resposta e atualiza status + nota"
+    reservedConcurrency: 5
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - CorrectionsQueue
+              - Arn
+          batchSize: 1
+          functionResponseType: ReportBatchItemFailures
+
+resources:
+  Resources:
+
+    SubmissionsBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${self:custom.s3Bucket}
+
+    CorrectionsQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: corrections-queue
+        VisibilityTimeout: 60
+        MessageRetentionPeriod: 3600
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [CorrectionsDLQ, Arn]
+          maxReceiveCount: 3
+
+    CorrectionsDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: corrections-dlq
+        MessageRetentionPeriod: 86400
+
+  Outputs:
+    ApiGatewayUrl:
+      Value:
+        Fn::Join:
+          - ""
+          - - "https://"
+            - Ref: ApiGatewayRestApi
+            - ".execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}"
