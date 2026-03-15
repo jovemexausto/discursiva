@@ -23,7 +23,9 @@ class SubmissionResponse(BaseModel):
 
 
 class SubmissionPageResponse(BaseModel):
-    items  : list[SubmissionResponse]
-    total  : int
-    limit  : int
-    offset : int
+    items         : list[SubmissionResponse]
+    total         : int
+    done_count    : int
+    pending_count : int
+    limit         : int
+    offset        : int

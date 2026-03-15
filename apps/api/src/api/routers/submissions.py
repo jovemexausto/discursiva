@@ -56,8 +56,10 @@ async def list_submissions(
         ListSubmissionsQuery(student_id=student_id, limit=limit, offset=offset)
     )
     return SubmissionPageResponse(
-        items=[submission_to_response(s) for s in page.items],
-        total=page.total,
-        limit=page.limit,
-        offset=page.offset,
+        items         = [submission_to_response(s) for s in page.items],
+        total         = page.total,
+        done_count    = page.done_count,
+        pending_count = page.pending_count,
+        limit         = page.limit,
+        offset        = page.offset,
     )

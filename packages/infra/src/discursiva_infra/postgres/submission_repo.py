@@ -38,10 +38,17 @@ class PostgresSubmissionRepository:
 
     async def list_by_student(
         self, student_id: str, limit: int, offset: int
-    ) -> tuple[list[Submission], int]:
+    ) -> tuple[list[Submission], int, int, int]:
         async with self._pool.acquire() as conn:
-            total = await conn.fetchval(
-                "SELECT COUNT(*) FROM submissions WHERE student_id = $1",
+            counts = await conn.fetchrow(
+                """
+                SELECT 
+                    COUNT(*) as total,
+                    COUNT(*) FILTER (WHERE status = 'DONE') as done_count,
+                    COUNT(*) FILTER (WHERE status IN ('PENDING', 'PROCESSING')) as pending_count
+                FROM submissions 
+                WHERE student_id = $1
+                """,
                 student_id,
             )
             rows = await conn.fetch(
@@ -53,7 +60,7 @@ class PostgresSubmissionRepository:
                 """,
                 student_id, limit, offset,
             )
-        return [self._to_entity(r) for r in rows], total
+        return [self._to_entity(r) for r in rows], counts["total"], counts["done_count"], counts["pending_count"]
 
     async def update(self, submission: Submission) -> None:
         await self._pool.execute(

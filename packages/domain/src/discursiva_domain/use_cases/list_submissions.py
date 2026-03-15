@@ -15,10 +15,12 @@ class ListSubmissionsQuery:
 
 @dataclass
 class SubmissionPage:
-    items  : list[Submission]
-    total  : int
-    limit  : int
-    offset : int
+    items         : list[Submission]
+    total         : int
+    done_count    : int
+    pending_count : int
+    limit         : int
+    offset        : int
 
 
 class ListSubmissions:
@@ -26,19 +28,20 @@ class ListSubmissions:
         self._repo = repo
 
     async def execute(self, query: ListSubmissionsQuery) -> SubmissionPage:
-        items, total = await self._repo.list_by_student(
+        items, total, done, pending = await self._repo.list_by_student(
             student_id = query.student_id,
             limit      = query.limit,
             offset     = query.offset,
         )
 
-        # Pequeno delay para simular latência de rede
         import asyncio
         await asyncio.sleep(1)
 
         return SubmissionPage(
-            items  = items,
-            total  = total,
-            limit  = query.limit,
-            offset = query.offset,
+            items         = items,
+            total         = total,
+            done_count    = done,
+            pending_count = pending,
+            limit         = query.limit,
+            offset        = query.offset,
         )

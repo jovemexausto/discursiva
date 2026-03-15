@@ -8,22 +8,28 @@ export default function SubmissionsPage() {
   const [studentId, setStudentId] = useState("aluno-1");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [total, setTotal] = useState(0);
+  const [doneCount, setDoneCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [page, setPage] = useState(1);
+  const limit = 10;
 
   const fetchSubmissions = useCallback(async () => {
     if (!studentId.trim()) return;
     setLoading(true);
     try {
-      const data = await listSubmissions(studentId.trim());
+      const data = await listSubmissions(studentId.trim(), limit, (page - 1) * limit);
       setSubmissions(data.items);
       setTotal(data.total);
+      setDoneCount(data.done_count ?? 0);
+      setPendingCount(data.pending_count ?? 0);
     } catch {
     } finally {
       setLoading(false);
       setInitialLoad(false);
     }
-  }, [studentId]);
+  }, [studentId, page]);
 
   useEffect(() => {
     setInitialLoad(true);
@@ -31,11 +37,6 @@ export default function SubmissionsPage() {
     const id = setInterval(fetchSubmissions, 5000);
     return () => clearInterval(id);
   }, [fetchSubmissions]);
-
-  const pending = submissions.filter(
-    (s) => s.status === "PENDING" || s.status === "PROCESSING"
-  ).length;
-  const done = submissions.filter((s) => s.status === "DONE").length;
 
   return (
     <div className="space-y-6 fade-in">
@@ -50,13 +51,16 @@ export default function SubmissionsPage() {
 
       <div className="flex flex-col items-start gap-1.5">
         <label htmlFor="filter-student" className="pl-1 text-sm font-medium text-gray-700">
-          Filtrar por aluno
+          ID do aluno
         </label>
         <input
           id="filter-student"
           type="text"
           value={studentId}
-          onChange={(e) => setStudentId(e.target.value)}
+          onChange={(e) => {
+            setStudentId(e.target.value);
+            setPage(1);
+          }}
           placeholder="ex: aluno-42"
           className="input sm:max-w-xs"
         />
@@ -70,27 +74,34 @@ export default function SubmissionsPage() {
               <strong>{total}</strong> total
             </span>
           </div>
-          {done > 0 && (
+          {doneCount > 0 && (
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-green-500" />
               <span className="text-sm text-gray-600">
-                <strong>{done}</strong> corrigidas
+                <strong>{doneCount}</strong> corrigidas
               </span>
             </div>
           )}
-          {pending > 0 && (
+          {pendingCount > 0 && (
             <div className="flex items-center gap-2">
               <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
               <span className="text-sm text-indigo-600">
-                <strong>{pending}</strong> aguardando
+                <strong>{pendingCount}</strong> aguardando
               </span>
             </div>
           )}
-          {loading && (
-            <span className="ml-auto text-xs text-gray-400 animate-pulse">
-              atualizando…
-            </span>
-          )}
+          <div className="ml-auto flex items-center gap-3">
+            {loading && (
+              <span className="text-xs text-gray-400 animate-pulse">
+                Atualizando …
+              </span>
+            )}
+            {total > 0 && (
+              <span className="text-xs text-gray-400 hidden sm:inline-block">
+                Exibindo {Math.min((page - 1) * limit + 1, total)} a {Math.min(page * limit, total)} de {total}
+              </span>
+            )}
+          </div>
         </div>
       )}
 
@@ -123,12 +134,46 @@ export default function SubmissionsPage() {
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {submissions.map((sub, i) => (
-            <div key={sub.id} className="slide-up" style={{ animationDelay: `${i * 50}ms` }}>
-              <SubmissionCard sub={sub} />
+        <div className="space-y-6">
+          <div className="space-y-3">
+            {submissions.map((sub, i) => (
+              <div key={sub.id} className="slide-up" style={{ animationDelay: `${i * 50}ms` }}>
+                <SubmissionCard sub={sub} />
+              </div>
+            ))}
+          </div>
+
+          {total > limit && (
+            <div className="flex items-center justify-between pt-6 pb-8 border-t border-gray-100">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
+                Anterior
+              </button>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500 bg-gray-50 px-3 py-1.5 rounded-lg font-medium">
+                  {page} <span className="text-gray-400 font-normal">/ {Math.ceil(total / limit)}</span>
+                </span>
+              </div>
+
+              <button
+                onClick={() => setPage((p) => (p * limit < total ? p + 1 : p))}
+                disabled={page * limit >= total}
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                Próxima
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>

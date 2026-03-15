@@ -80,7 +80,7 @@ export default function SubmitPage() {
             onChange={(e) => setStudentId(e.target.value)}
             placeholder="ex: aluno-42"
             required
-            className="input"
+            className="input sm:max-w-xs"
           />
         </div>
 
@@ -92,7 +92,7 @@ export default function SubmitPage() {
             id="answer-text"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            rows={8}
+            rows={10}
             placeholder="Digite a resposta do aluno aqui..."
             required
             className="input resize-none"
@@ -114,7 +114,7 @@ export default function SubmitPage() {
           </div>
         )}
 
-        <button type="submit" disabled={submitting || !text.trim()} className="btn-primary w-full">
+        <button type="submit" disabled={submitting || !text.trim()} className="btn-primary w-full sm:max-w-xs">
           {submitting ? (
             <>
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">

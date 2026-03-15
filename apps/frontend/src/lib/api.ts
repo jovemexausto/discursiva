@@ -15,6 +15,8 @@ export interface Submission {
 export interface SubmissionPage {
   items: Submission[];
   total: number;
+  done_count: number;
+  pending_count: number;
   limit: number;
   offset: number;
 }
@@ -37,7 +39,7 @@ export async function getSubmission(id: string): Promise<Submission> {
 
 export async function listSubmissions(
   student_id: string,
-  limit = 20,
+  limit = 10,
   offset = 0,
 ): Promise<SubmissionPage> {
   const p = new URLSearchParams({ student_id, limit: String(limit), offset: String(offset) });
