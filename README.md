@@ -2,6 +2,8 @@
 
 Micro-serviço para submissão e correção assíncrona de textos discursivos. Stack: Python (asyncio) + Postgres + SQS + S3, com um frontend Next.js. Tudo sobe localmente com um único `docker compose up`.
 
+![Frontend Screenshot](.github/assets/frontend-screenshot.png)
+
 ## Contexto
 
 O desafio pedia um back-end funcional em ~60 minutos. Como o tempo permitiu, optei por uma estrutura um pouco mais cuidadosa: separação de camadas, testes unitários sem I/O, schema SQL com tipos nativos e índices adequados. Nada que não estaria no projeto de produção real.
@@ -172,6 +174,8 @@ flowchart TD
 O `serverless.yml` já define tudo: funções, permissões IAM, bucket S3, fila SQS e DLQ. Para subir em produção seria só `sls deploy --stage prod`, sem tocar no código.
 
 A API retorna `201` antes do worker processar porque não faz sentido deixar o cliente esperando uma correção que pode levar segundos. O SQS garante que a mensagem não se perde mesmo se o worker cair no meio do caminho, e a DLQ captura o que falhou três vezes sem perder dados silenciosamente.
+
+Para otimização de custos e performance, o processamento de mensagens pode ser feito em batches. Isso reduz o número de invocações da Lambda e o custo de polling do SQS, sendo uma prática recomendada para cargas de trabalho elevadas.
 
 O único gargalo real em escala seria o pool de conexões do Postgres com muitas Lambdas concorrentes. O RDS Proxy resolve isso sem mudança de código.
 
