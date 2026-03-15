@@ -7,7 +7,7 @@ from discursiva_domain.use_cases import CorrectSubmission
 from discursiva_infra.postgres.pool import get_pool, close_pool
 from discursiva_infra.postgres.submission_repo import PostgresSubmissionRepository
 from discursiva_infra.s3.storage import S3Storage
-from discursiva_infra.settings import settings
+from discursiva_infra.settings import get_settings
 from discursiva_infra.sqs.queue import SQSQueue
 
 logging.basicConfig(
@@ -24,6 +24,7 @@ async def run() -> None:
     storage  = S3Storage()
     queue    = SQSQueue()
     use_case = CorrectSubmission(repo=repo, storage=storage, queue=queue)
+    settings = get_settings()
 
     log.info("Worker iniciado | Aguardando mensagens em %s", settings.sqs_queue_url)
 

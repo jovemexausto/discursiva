@@ -7,11 +7,12 @@ from functools import partial
 import boto3
 
 from discursiva_domain.ports import CorrectionMessage
-from discursiva_infra.settings import settings
+from discursiva_infra.settings import get_settings
 
 
 class SQSQueue:
     def __init__(self) -> None:
+        settings = get_settings()
         self._client = boto3.client(
             "sqs",
             endpoint_url          = settings.sqs_endpoint_url,

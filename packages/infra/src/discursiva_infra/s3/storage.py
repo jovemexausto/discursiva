@@ -5,11 +5,12 @@ from functools import partial
 
 import boto3
 
-from discursiva_infra.settings import settings
+from discursiva_infra.settings import get_settings
 
 
 class S3Storage:
     def __init__(self) -> None:
+        settings = get_settings()
         self._client = boto3.client(
             "s3",
             endpoint_url          = settings.s3_endpoint_url,

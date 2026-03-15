@@ -2,27 +2,19 @@ from __future__ import annotations
 
 import asyncpg
 
-from discursiva_infra.settings import settings
+from discursiva_infra.settings import get_settings
 
 
 async def get_pool() -> asyncpg.Pool:
-    """
-    Cria um pool por invocação Lambda.
-
-    asyncio.run() destrói o event loop ao final de cada chamada, invalidando
-    qualquer pool criado em loops anteriores. A solução correta para Lambda é
-    criar um pool leve (max_size=1) por invocação e fechá-lo no finally do
-    handler — o overhead é desprezível com uma única conexão.
-
-    Em produção com RDS Proxy o padrão é o mesmo: uma conexão por Lambda
-    container, o Proxy gerencia o multiplexing upstream.
-    """
+    """Cria e retorna um pool de conexões com o Postgres, configurado conforme as variáveis de ambiente."""
+    settings = get_settings()
     return await asyncpg.create_pool(
         dsn=settings.database_url,
-        min_size=1,
-        max_size=1,
+        min_size=settings.database_pool_min_size,
+        max_size=settings.database_pool_max_size,
     )
 
 
 async def close_pool(pool: asyncpg.Pool) -> None:
+    """Fecha um pool de conexões com o Postgres."""
     await pool.close()
