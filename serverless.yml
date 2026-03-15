@@ -39,6 +39,19 @@ provider:
           Resource: "arn:aws:sqs:${self:provider.region}:*:corrections-queue"
 
 functions:
+  status:
+    handler: apps/api/src/api/handlers/+status.handler
+    description: "Status do API Gateway, pode ser subistituido solução mais robusta"
+    package:
+      patterns:
+        - "apps/api/src/**"
+    events:
+      - http:
+          path: /status
+          method: get
+          cors: true
+
+
   createSubmission:
     handler: apps/api/src/api/handlers/create_submission.handler
     description: "Recebe texto, salva no S3, cria job PENDING no Postgres, publica na fila"

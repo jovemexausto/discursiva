@@ -9,6 +9,5 @@ services:
              uv run python -m worker.main"
     volumes:
       - ../../:/app
-      - /app/.venv
     env_file: ../../.env.local
 

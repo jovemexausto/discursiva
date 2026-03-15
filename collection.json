@@ -100,20 +100,20 @@
       "description": "Endpoints relacionados ao gerenciamento de submissões discursivas."
     },
     {
-      "name": "Health",
+      "name": "Status",
       "item": [
         {
-          "name": "Health Check",
+          "name": "Status",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/health",
+              "raw": "{{base_url}}/status",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
-                "health"
+                "status"
               ]
             },
             "description": "Endpoint simples para verificar se a API está no ar."
@@ -129,10 +129,10 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "// Salva o ID da submissão criada na variável de ambiente local 'submission_id' para uso nos próximos requests.",
+          "// Salva o ID da submissão criada na variável de coleção 'submission_id' para uso nos próximos requests.",
           "if (pm.request.url.getPath() === '/submissions' && pm.request.method === 'POST' && pm.response.code === 201) {",
           "    var jsonData = pm.response.json();",
-          "    pm.environment.set(\"submission_id\", jsonData.id);",
+          "    pm.collectionVariables.set(\"submission_id\", jsonData.id);",
           "    console.log(\"submission_id configurado para: \" + jsonData.id);",
           "}"
         ]

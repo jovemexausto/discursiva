@@ -19,10 +19,9 @@ services:
     volumes:
       - ../../:/app
       - /app/node_modules
-      - /app/.venv
     env_file: ../../.env.local
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/submissions?student_id=1"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/status"]
       interval: 10s
       timeout: 5s
       retries: 10
