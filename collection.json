@@ -38,7 +38,22 @@
             },
             "description": "Cria uma nova submissão de texto discursivo para correção. Retorna o ID da submissão que deve ser usado para consultar o status posteriormente."
           },
-          "response": []
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"submission_id\", jsonData.id);",
+                  "    console.log(\"ID salvo com sucesso: \" + jsonData.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
         },
         {
           "name": "Consultar Submissão por ID",
@@ -121,22 +136,6 @@
           "response": []
         }
       ]
-    }
-  ],
-  "event": [
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "// Salva o ID da submissão criada na variável de coleção 'submission_id' para uso nos próximos requests.",
-          "if (pm.request.url.getPath() === '/submissions' && pm.request.method === 'POST' && pm.response.code === 201) {",
-          "    var jsonData = pm.response.json();",
-          "    pm.collectionVariables.set(\"submission_id\", jsonData.id);",
-          "    console.log(\"submission_id configurado para: \" + jsonData.id);",
-          "}"
-        ]
-      }
     }
   ],
   "variable": [
