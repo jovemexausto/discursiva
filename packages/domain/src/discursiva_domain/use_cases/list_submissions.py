@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from dataclasses import dataclass
 
 from discursiva_domain.entities import Submission
@@ -34,7 +35,7 @@ class ListSubmissions:
             offset     = query.offset,
         )
 
-        import asyncio
+        # Simula um pequeno delay para melhorar experiência na demo
         await asyncio.sleep(1)
 
         return SubmissionPage(

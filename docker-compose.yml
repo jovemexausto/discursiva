@@ -1,15 +1,15 @@
 services:
   postgres:
     extends:
-      file: docker/compose.database.yml
+      file: packages/infra/compose.db.yml
       service: postgres
 
   localstack:
     extends:
-      file: docker/compose.localstack.yml
+      file: packages/infra/compose.aws.yml
       service: localstack
     volumes:
-      - ./docker/init-localstack.sh:/etc/localstack/init/ready.d/init.sh:ro
+      - ./packages/infra/init-localstack.sh:/etc/localstack/init/ready.d/init.sh:ro
 
   api:
     extends:

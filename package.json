@@ -9,8 +9,6 @@
     "serverless-offline": "^13"
   },
   "scripts": {
-    "preinstall": "./preinstall.sh",
-    "postinstall": "npm --prefix apps/frontend install && uv sync && cp .env.example .env.local",
     "deploy:local": "dotenv -e .env.local serverless deploy --stage local",
     "remove:local": "docker compose -f docker/docker-compose.localstack.yml down -v"
   }

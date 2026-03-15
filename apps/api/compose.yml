@@ -12,11 +12,14 @@ services:
       LOCALSTACK_PORT: 4566
     command: >
       sh -c "uv sync --quiet &&
+             npm install &&
              npx serverless offline --stage local --host 0.0.0.0"
     ports:
       - "8000:8000"
     volumes:
       - ../../:/app
+      - /app/node_modules
+      - /app/.venv
     env_file: ../../.env.local
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/submissions?student_id=1"]

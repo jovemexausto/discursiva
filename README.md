@@ -8,7 +8,7 @@ A forma mais rápida é usar o Docker Compose, que já sobe o banco, o LocalStac
 
 ```bash
 # 1. Prepare as variáveis de ambiente
-cp .env.example .env
+cp .env.example .env.local
 
 # 2. Suba tudo
 docker compose up --build
@@ -16,7 +16,6 @@ docker compose up --build
 
 - **API:** `http://localhost:8000`
 - **Frontend:** `http://localhost:3000`
-- **Docs (Swagger):** `http://localhost:8000/docs`
 
 ---
 

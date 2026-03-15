@@ -1,0 +1,154 @@
+{
+  "info": {
+    "name": "Discursiva API",
+    "description": "API REST para submissão e consulta de correções de textos discursivos.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Submissions",
+      "item": [
+        {
+          "name": "Criar Submissão",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"aluno-42\",\n  \"text\": \"A educação brasileira enfrenta desafios significativos.\\n\\nEntre os principais problemas está a desigualdade de acesso.\\n\\nInvestimentos em infraestrutura e tecnologia são fundamentais.\\n\\nAlém disso, a capacitação dos professores precisa ser contínua.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/submissions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "submissions"
+              ]
+            },
+            "description": "Cria uma nova submissão de texto discursivo para correção. Retorna o ID da submissão que deve ser usado para consultar o status posteriormente."
+          },
+          "response": []
+        },
+        {
+          "name": "Consultar Submissão por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/submissions/{{submission_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "submissions",
+                "{{submission_id}}"
+              ]
+            },
+            "description": "Retorna os detalhes de uma submissão específica, incluindo o status (PENDING, PROCESSING, DONE, ERROR) e a nota final (se aplicável)."
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Submissões por Aluno",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/submissions?student_id=aluno-42",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "submissions"
+              ],
+              "query": [
+                {
+                  "key": "student_id",
+                  "value": "aluno-42",
+                  "description": "ID do aluno para filtrar as submissões"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Quantidade máxima de registros a retornar",
+                  "disabled": true
+                },
+                {
+                  "key": "offset",
+                  "value": "0",
+                  "description": "Offset para paginação",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Lista as submissões feitas por um aluno específico. Suporta paginação básica via `limit` e `offset`."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints relacionados ao gerenciamento de submissões discursivas."
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Endpoint simples para verificar se a API está no ar."
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Salva o ID da submissão criada na variável de ambiente local 'submission_id' para uso nos próximos requests.",
+          "if (pm.request.url.getPath() === '/submissions' && pm.request.method === 'POST' && pm.response.code === 201) {",
+          "    var jsonData = pm.response.json();",
+          "    pm.environment.set(\"submission_id\", jsonData.id);",
+          "    console.log(\"submission_id configurado para: \" + jsonData.id);",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "submission_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
