@@ -2,7 +2,7 @@ import os
 import pytest
 import httpx
 
-# A URL base será o Serverless Offline ou LocalStack
+# A URL base será gerada pelo serverless offline
 E2E_URL = os.environ.get("E2E_URL", "")
 
 @pytest.fixture
