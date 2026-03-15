@@ -9,7 +9,7 @@ from discursiva_domain.value_objects import SubmissionId
 
 class SubmissionNotFound(Exception):
     def __init__(self, submission_id: str) -> None:
-        super().__init__(f"Submission {submission_id!r} not found")
+        super().__init__(f"Submissão {submission_id!r} não encontrada")
 
 
 @dataclass

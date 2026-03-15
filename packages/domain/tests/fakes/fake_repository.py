@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from discursiva_domain.entities import Submission
-from discursiva_domain.ports import SubmissionRepository
 from discursiva_domain.value_objects import SubmissionId
 
 
-class FakeSubmissionRepository(SubmissionRepository):
+class FakeSubmissionRepository:
     def __init__(self) -> None:
         self._store: dict[str, Submission] = {}
 

@@ -25,14 +25,14 @@ class CorrectSubmission:
         submission = await self._repo.get(sid)
 
         if submission is None:
-            log.warning("Submission %s not found, skipping", message.submission_id)
+            log.warning("Submissão %s não encontrada, ignorando", message.submission_id)
             await self._queue.delete(message.receipt_handle)
             return
 
         # Idempotência: se já foi processada por outro worker, descarta
         if submission.status.value != "PENDING":
             log.warning(
-                "Submission %s already in status %s, skipping",
+                "Submissão %s já está no status %s, ignorando",
                 message.submission_id,
                 submission.status,
             )
@@ -50,10 +50,10 @@ class CorrectSubmission:
             await self._repo.update(submission)
 
             await self._queue.delete(message.receipt_handle)
-            log.info("Submission %s corrected — score: %s", message.submission_id, score)
+            log.info("Submissão %s corrigida — nota: %s", message.submission_id, score)
 
         except Exception:
             submission.mark_error()
             await self._repo.update(submission)
-            log.exception("Failed to correct submission %s", message.submission_id)
+            log.exception("Falha ao corrigir submissão %s", message.submission_id)
             # Não deleta a mensagem, volta à fila para retry / DLQ

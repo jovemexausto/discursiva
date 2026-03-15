@@ -1,13 +1,15 @@
 services:
   postgres:
     extends:
-      file: packages/infra/compose.yml
+      file: docker/compose.database.yml
       service: postgres
 
   localstack:
     extends:
-      file: packages/infra/compose.yml
+      file: docker/compose.localstack.yml
       service: localstack
+    volumes:
+      - ./docker/init-localstack.sh:/etc/localstack/init/ready.d/init.sh:ro
 
   api:
     extends:
@@ -34,7 +36,8 @@ services:
       file: apps/frontend/compose.yml
       service: frontend
     depends_on:
-      - api
+      api:
+        condition: service_healthy
 
 volumes:
   pg_data:

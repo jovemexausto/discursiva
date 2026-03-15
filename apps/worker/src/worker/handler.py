@@ -24,9 +24,9 @@ async def _process(event: dict) -> None:
     pool = await get_pool()
     try:
         use_case = CorrectSubmission(
-            repo=PostgresSubmissionRepository(pool),
-            storage=_storage,
-            queue=_queue,
+            repo    = PostgresSubmissionRepository(pool),
+            storage = _storage,
+            queue   = _queue,
         )
         for record in event.get("Records", []):
             body = json.loads(record["body"])
@@ -35,13 +35,13 @@ async def _process(event: dict) -> None:
                 s3_key         = body["s3_key"],
                 receipt_handle = record.get("receiptHandle", ""),
             )
-            log.info("Processing submission %s", msg.submission_id)
+            log.info("Processando submissão %s", msg.submission_id)
             await use_case.execute(msg)
     finally:
         await close_pool(pool)
 
 
 def process(event: dict, context: Any) -> dict:
-    """Entry point for AWS Lambda / LocalStack."""
+    """Entry point para AWS Lambda / LocalStack."""
     asyncio.run(_process(event))
-    return {"statusCode": 200}
+    return { "statusCode": 200 }

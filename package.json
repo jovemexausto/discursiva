@@ -6,11 +6,12 @@
     "dotenv-cli": "^11.0.0",
     "serverless": "^3",
     "serverless-localstack": "^1.2",
-    "serverless-offline": "^13",
-    "serverless-offline-sqs": "^8"
+    "serverless-offline": "^13"
   },
   "scripts": {
+    "preinstall": "./preinstall.sh",
+    "postinstall": "npm --prefix apps/frontend install && uv sync && cp .env.example .env.local",
     "deploy:local": "dotenv -e .env.local serverless deploy --stage local",
-    "remove:local": "dotenv -e .env.local serverless remove --stage local"
+    "remove:local": "docker compose -f docker/docker-compose.localstack.yml down -v"
   }
 }

@@ -1,0 +1,22 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  deploy:
+    name: Mimic Deploy to AWS
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Mimic Deployment Step
+        run: |
+          echo "Em um cenário real, aqui rodaríamos:"
+          echo "1. npx serverless deploy --stage prod"
+          echo "2. Configuração de segredos no AWS Secrets Manager"
+          echo "3. Migrações de banco de dados (RDS)"
+          echo ""
+          echo "Este workflow é apenas uma demonstração de como poderia ser o processo de entrega contínua."

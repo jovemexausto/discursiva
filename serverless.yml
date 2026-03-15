@@ -5,7 +5,6 @@ frameworkVersion: "3"
 plugins:
   - serverless-offline
   - serverless-localstack
-  - serverless-offline-sqs
 
 provider:
   name: aws
@@ -39,37 +38,13 @@ provider:
             - sqs:GetQueueAttributes
           Resource: "arn:aws:sqs:${self:provider.region}:*:corrections-queue"
 
-custom:
-  s3Bucket: discursiva-submissions
-  sqsQueueUrl: "http://localhost:4566/000000000000/corrections-queue"
-  awsEndpoint: "http://localhost:4566"
-
-  localstack:
-    stages:
-      - local
-    host: http://localhost
-    edgePort: 4566
-    autostart: false
-
-  serverless-offline-sqs:
-    autoCreate: true
-    apiVersion: "2012-11-05"
-    endpoint: http://localhost:4566
-    region: us-east-1
-    accessKeyId: test
-    secretAccessKey: test
-    skipCacheInvalidation: false
-
-  serverless-offline:
-    httpPort: 8000
-    lambdaPort: 8002
-    noPrependStageInUrl: true
-
 functions:
-
   createSubmission:
-    handler: apps/api/src/api/handler.create
+    handler: apps/api/src/api/handlers/create_submission.handler
     description: "Recebe texto, salva no S3, cria job PENDING no Postgres, publica na fila"
+    package:
+      patterns:
+        - "apps/api/src/**"
     events:
       - http:
           path: /submissions
@@ -77,8 +52,11 @@ functions:
           cors: true
 
   getSubmission:
-    handler: apps/api/src/api/handler.get_by_id
+    handler: apps/api/src/api/handlers/get_submission.handler
     description: "Retorna detalhes + status + nota de uma submissão"
+    package:
+      patterns:
+        - "apps/api/src/**"
     events:
       - http:
           path: /submissions/{id}
@@ -86,26 +64,16 @@ functions:
           cors: true
 
   listSubmissions:
-    handler: apps/api/src/api/handler.list_by_student
+    handler: apps/api/src/api/handlers/list_submissions.handler
     description: "Lista submissões por student_id com paginação simples"
+    package:
+      patterns:
+        - "apps/api/src/**"
     events:
       - http:
           path: /submissions
           method: get
           cors: true
-
-  worker:
-    handler: apps/worker/src/worker/handler.process
-    description: "Consome fila SQS, corrige a resposta e atualiza status + nota"
-    reservedConcurrency: 5
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - CorrectionsQueue
-              - Arn
-          batchSize: 1
-          functionResponseType: ReportBatchItemFailures
 
 resources:
   Resources:
@@ -140,3 +108,45 @@ resources:
           - - "https://"
             - Ref: ApiGatewayRestApi
             - ".execute-api.${self:provider.region}.amazonaws.com/${self:provider.stage}"
+
+custom:
+  s3Bucket: discursiva-submissions
+  sqsQueueUrl: ${env:SQS_QUEUE_URL}
+  awsEndpoint: ${env:S3_ENDPOINT_URL}
+
+  localstack:
+    stages:
+      - local
+    host: ${env:LOCALSTACK_HOST, 'http://localhost'}
+    edgePort: ${env:LOCALSTACK_PORT, 4566}
+    autostart: true
+    lambda:
+      mountCode: true
+    docker:
+      sudo: False
+      compose_file: docker/compose.localstack.yml
+
+  serverless-offline:
+    httpPort: 8000
+    lambdaPort: 8002
+    noPrependStageInUrl: true
+
+package:
+  individually: true
+  patterns:
+    - "!**"
+    - "packages/domain/src/**"
+    - "packages/infra/src/**"
+    - "!node_modules/**"
+    - "!**/.venv/**"
+    - "!**/tests/**"
+    - "!**/__pycache__/**"
+    - "!apps/frontend/**"
+    - "!packages/infra/init-localstack.sh"
+    - "!docker-compose.yml"
+    - "!**/compose.yml"
+    - "!**/Dockerfile.dev"
+    - "!**/Dockerfile"
+    - "!.git/**"
+    - "!.serverless/**"
+    - "!package-lock.json"

@@ -5,9 +5,7 @@ requires-python = ">=3.11"
 dependencies = [
     "discursiva-domain",
     "discursiva-infra",
-    "fastapi>=0.111",
-    "uvicorn[standard]>=0.29",
-    "pydantic>=2.7",
+    "asyncpg>=0.29.0",
 ]
 
 [build-system]

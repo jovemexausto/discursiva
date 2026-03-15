@@ -1,5 +1,4 @@
 #!/bin/bash
-# Executado pelo LocalStack quando o container estiver "saudável"
 set -e
 
 AWS="aws --endpoint-url=http://localhost:4566 --region us-east-1"

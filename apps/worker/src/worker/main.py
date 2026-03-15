@@ -23,7 +23,7 @@ async def run() -> None:
     use_case = CorrectSubmission(repo=repo, storage=storage, queue=queue)
     settings = get_settings()
 
-    log.info("Worker iniciado | Aguardando mensagens em %s", settings.sqs_queue_url)
+    log.info("Worker iniciado, aguardando mensagens em %s", settings.sqs_queue_url)
 
     try:
         while True:
@@ -35,7 +35,7 @@ async def run() -> None:
                 continue
 
             # Um pequeno delay para simular o tempo de processamento
-            await asyncio.sleep(7)
+            await asyncio.sleep(5)
             tasks = [use_case.execute(msg) for msg in messages]
             await asyncio.gather(*tasks, return_exceptions=True)
 

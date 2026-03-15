@@ -9,5 +9,4 @@ services:
       - ../../:/app
     environment:
       INTERNAL_API_URL: http://api:8000
-    depends_on:
-      - api
+
