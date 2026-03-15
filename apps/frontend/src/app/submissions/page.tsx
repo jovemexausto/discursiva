@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from "react";
 import { listSubmissions, type Submission } from "@/lib/api";
 import { SubmissionCard } from "@/components/SubmissionCard";
-
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 export default function SubmissionsPage() {
-  const [studentId, setStudentId] = useState("aluno-1");
+  const [studentId, setStudentId, isHydrated] = useLocalStorage("studentId", "aluno-1");
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [total, setTotal] = useState(0);
   const [doneCount, setDoneCount] = useState(0);
@@ -32,11 +32,13 @@ export default function SubmissionsPage() {
   }, [studentId, page]);
 
   useEffect(() => {
+    if (!isHydrated) return;
+    
     setInitialLoad(true);
     fetchSubmissions();
     const id = setInterval(fetchSubmissions, 5000);
     return () => clearInterval(id);
-  }, [fetchSubmissions]);
+  }, [fetchSubmissions, isHydrated]);
 
   return (
     <div className="space-y-6 fade-in">

@@ -1,5 +1,3 @@
-"""Lambda handler — SQS event trigger for submission correction."""
-
 from __future__ import annotations
 
 import asyncio

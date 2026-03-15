@@ -1,6 +1,7 @@
 import type { Submission } from "@/lib/api";
 import { StatusBadge } from "./StatusBadge";
 import { ScoreRing } from "./ScoreRing";
+import Link from "next/link";
 
 export function SubmissionCard({ sub }: { sub: Submission }) {
   const shortId = sub.id.split("-").slice(0, 2).join("-");
@@ -12,7 +13,7 @@ export function SubmissionCard({ sub }: { sub: Submission }) {
   });
 
   return (
-    <div className="card !p-4 group cursor-default">
+    <Link href={`/submissions/${sub.id}`} className="block card !p-4 group hover:border-indigo-200 hover:shadow-md transition-all">
       <div className="flex items-center gap-4">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1.5">
@@ -38,6 +39,6 @@ export function SubmissionCard({ sub }: { sub: Submission }) {
           )}
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

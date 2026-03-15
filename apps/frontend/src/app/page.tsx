@@ -3,9 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createSubmission, type Submission } from "@/lib/api";
-
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 export default function SubmitPage() {
-  const [studentId, setStudentId] = useState("aluno-1");
+  const [studentId, setStudentId] = useLocalStorage("studentId", "aluno-1");
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
