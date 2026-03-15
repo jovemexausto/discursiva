@@ -11,12 +11,9 @@ from discursiva_infra.postgres.pool import close_pool, get_pool
 from discursiva_infra.postgres.submission_repo import PostgresSubmissionRepository
 from discursiva_infra.s3.storage import S3Storage
 from discursiva_infra.sqs.queue import SQSQueue
+from discursiva_infra.logging_config import setup_logging
 
-logging.basicConfig(
-    level   = logging.INFO,
-    format  = "%(asctime)s [WORKER] %(levelname)s %(message)s",
-    datefmt = "%Y-%m-%dT%H:%M:%S",
-)
+setup_logging()
 log = logging.getLogger(__name__)
 
 _storage = S3Storage()
