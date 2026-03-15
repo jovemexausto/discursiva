@@ -1,8 +1,10 @@
-CREATE TYPE submission_status AS ENUM (
-    'PENDING', 'PROCESSING', 'DONE', 'ERROR'
-);
+DO $$ BEGIN
+    CREATE TYPE submission_status AS ENUM ('PENDING', 'PROCESSING', 'DONE', 'ERROR');
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
 
-CREATE TABLE submissions (
+CREATE TABLE IF NOT EXISTS submissions (
     id          UUID              PRIMARY KEY,
     student_id  TEXT              NOT NULL,
     s3_key      TEXT              NOT NULL,
@@ -12,10 +14,10 @@ CREATE TABLE submissions (
     updated_at  TIMESTAMPTZ       NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_submissions_student_id
+CREATE INDEX IF NOT EXISTS idx_submissions_student_id
     ON submissions (student_id);
 
-CREATE INDEX idx_submissions_student_created
+CREATE INDEX IF NOT EXISTS idx_submissions_student_created
     ON submissions (student_id, created_at DESC);
 
 CREATE OR REPLACE FUNCTION set_updated_at()
@@ -26,6 +28,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_submissions_updated_at
-BEFORE UPDATE ON submissions
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+DO $$ BEGIN
+    CREATE TRIGGER trg_submissions_updated_at
+    BEFORE UPDATE ON submissions
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+END $$;
