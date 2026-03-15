@@ -9,7 +9,7 @@ services:
              uv run python -m worker.main"
     volumes:
       - ../../:/app
-    env_file: ../../.env
+    env_file: ../../.env.local
     depends_on:
       postgres:
         condition: service_healthy

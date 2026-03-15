@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     # Worker
     worker_poll_interval: int = 3
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env.local", extra="ignore")
 
 
 settings = Settings()

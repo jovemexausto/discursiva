@@ -4,13 +4,14 @@
   "private": true,
   "description": "Serverless Framework plugins for Discursiva",
   "devDependencies": {
+    "dotenv-cli": "^11.0.0",
     "serverless": "^3",
     "serverless-localstack": "^1.2",
     "serverless-offline": "^13",
     "serverless-offline-sqs": "^8"
   },
   "scripts": {
-    "deploy:local": "serverless deploy --stage local",
-    "remove:local": "serverless remove --stage local"
+    "deploy:local": "dotenv -e .env.local serverless deploy --stage local",
+    "remove:local": "dotenv -e .env.local serverless remove --stage local"
   }
 }
