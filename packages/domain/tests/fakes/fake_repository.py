@@ -17,12 +17,14 @@ class FakeSubmissionRepository(SubmissionRepository):
 
     async def list_by_student(
         self, student_id: str, limit: int, offset: int
-    ) -> tuple[list[Submission], int]:
+    ) -> tuple[list[Submission], int, int, int]:
         matches = [
             s for s in self._store.values() if s.student_id == student_id
         ]
         matches.sort(key=lambda s: s.created_at, reverse=True)
-        return matches[offset : offset + limit], len(matches)
+        done_count = sum(1 for s in matches if s.status == "DONE")
+        pending_count = sum(1 for s in matches if s.status in ("PENDING", "PROCESSING"))
+        return matches[offset : offset + limit], len(matches), done_count, pending_count
 
     async def update(self, submission: Submission) -> None:
         self._store[str(submission.id)] = submission
