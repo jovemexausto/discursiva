@@ -6,10 +6,12 @@
     "dotenv-cli": "^11.0.0",
     "serverless": "^3",
     "serverless-localstack": "^1.2",
-    "serverless-offline": "^13"
+    "serverless-offline": "^13",
+    "serverless-python-requirements": "^6.1.2"
   },
   "scripts": {
-    "deploy:local": "dotenv -e .env.local serverless deploy --stage local",
-    "remove:local": "docker compose -f docker/docker-compose.localstack.yml down -v"
+    "sync": "npm i && npm --prefix apps/frontend i && uv sync --all-groups",
+    "deploy:local": "bash packages/infra/generate-requirements.sh && dotenv -e .env.local -- serverless deploy --stage local",
+    "remove:local": "docker ps -aq --filter network=infra_default | xargs -r docker rm -f 2>/dev/null; docker compose -f packages/infra/compose.sls.yml down -v --remove-orphans"
   }
 }

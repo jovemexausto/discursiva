@@ -6,7 +6,7 @@ services:
 
   localstack:
     extends:
-      file: packages/infra/compose.aws.yml
+      file: packages/infra/compose.sls.yml
       service: localstack
     volumes:
       - ./packages/infra/init-localstack.sh:/etc/localstack/init/ready.d/init.sh:ro

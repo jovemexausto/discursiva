@@ -5,6 +5,7 @@ frameworkVersion: "3"
 plugins:
   - serverless-offline
   - serverless-localstack
+  - serverless-python-requirements
 
 provider:
   name: aws
@@ -16,11 +17,18 @@ provider:
 
   environment:
     DATABASE_URL: ${env:DATABASE_URL}
+    DATABASE_POOL_MIN_SIZE: ${env:DATABASE_POOL_MIN_SIZE, 1}
+    DATABASE_POOL_MAX_SIZE: ${env:DATABASE_POOL_MAX_SIZE, 1}
     S3_BUCKET: ${self:custom.s3Bucket}
     SQS_QUEUE_URL: ${self:custom.sqsQueueUrl}
     S3_ENDPOINT_URL: ${self:custom.awsEndpoint}
     SQS_ENDPOINT_URL: ${self:custom.awsEndpoint}
+    AWS_ACCESS_KEY_ID: ${env:AWS_ACCESS_KEY_ID, 'test'}
+    AWS_SECRET_ACCESS_KEY: ${env:AWS_SECRET_ACCESS_KEY, 'test'}
+    AWS_REGION: ${self:provider.region}
+    WORKER_POLL_INTERVAL: ${env:WORKER_POLL_INTERVAL, 5}
     STAGE: ${self:provider.stage}
+    PYTHONPATH: .:/var/task/packages/domain/src:/var/task/packages/infra/src:/var/task/apps/api/src:/var/task/apps/worker/src
 
   iam:
     role:
@@ -88,6 +96,18 @@ functions:
           method: get
           cors: true
 
+  worker:
+    handler: apps/worker/src/worker/handler.process
+    description: "Consome mensagens da fila, calcula nota e atualiza DB"
+    package:
+      patterns:
+        - "apps/worker/src/**"
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [CorrectionsQueue, Arn]
+          batchSize: 1
+
 resources:
   Resources:
 
@@ -134,15 +154,20 @@ custom:
     edgePort: ${env:LOCALSTACK_PORT, 4566}
     autostart: true
     lambda:
-      mountCode: true
+      mountCode: false
     docker:
       sudo: False
-      compose_file: docker/compose.localstack.yml
+      compose_file: packages/infra/compose.sls.yml
 
   serverless-offline:
     httpPort: 8000
     lambdaPort: 8002
     noPrependStageInUrl: true
+
+  pythonRequirements:
+    dockerizePip: true
+    useStaticCache: false
+    useDownloadCache: false
 
 package:
   individually: true

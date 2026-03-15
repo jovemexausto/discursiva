@@ -1,22 +1,95 @@
 name: Deploy
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 on:
   push:
     branches: [ master ]
 
 jobs:
-  deploy:
-    name: Mimic Deploy to AWS
+  test:
+    name: Tests
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      - name: Mimic Deployment Step
-        run: |
-          echo "Em um cenário real, aqui rodaríamos:"
-          echo "1. npx serverless deploy --stage prod"
-          echo "2. Configuração de segredos no AWS Secrets Manager"
-          echo "3. Migrações de banco de dados (RDS)"
-          echo ""
-          echo "Este workflow é apenas uma demonstração de como poderia ser o processo de entrega contínua."
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Run tests
+        run: uv run pytest
+  ## Deixando apenas para esclarecer o conceito.
+  # deploy:
+  #   name: Deploy to AWS
+  #   runs-on: ubuntu-latest
+  #   needs: test
+  #   if: |
+  #     ${{ secrets.AWS_ACCESS_KEY_ID != '' &&
+  #     secrets.AWS_SECRET_ACCESS_KEY != '' &&
+  #     secrets.DATABASE_URL != '' }}
+  #   env:
+  #     AWS_ACCESS_KEY_ID:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     AWS_REGION:            us-east-1
+  #     DATABASE_URL:          ${{ secrets.DATABASE_URL }}
+
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20"
+
+  #     - name: Install Serverless Framework
+  #       run: npm install -g serverless@3
+
+  #     - name: Install plugins
+  #       run: npm install
+
+  #     - name: Install uv
+  #       uses: astral-sh/setup-uv@v5
+  #       with:
+  #         version: "latest"
+  #         enable-cache: true
+
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version-file: "pyproject.toml"
+
+  #     - name: Install Python dependencies
+  #       run: uv sync --no-dev
+
+  #     - name: Run database migrations
+  #       run: |
+  #         uv run python - <<'EOF'
+  #         import asyncio, asyncpg, os, pathlib
+
+  #         async def migrate():
+  #             sql = pathlib.Path(
+  #                 "packages/infra/src/discursiva_infra/postgres/migrations/schema.sql"
+  #             ).read_text()
+  #             conn = await asyncpg.connect(os.environ["DATABASE_URL"])
+  #             try:
+  #                 await conn.execute(sql)
+  #             finally:
+  #                 await conn.close()
+
+  #         asyncio.run(migrate())
+  #         EOF
+
+  #     - name: Deploy
+  #       run: npx serverless deploy --stage prod --verbose

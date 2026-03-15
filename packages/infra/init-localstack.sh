@@ -1,12 +1,12 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 AWS="aws --endpoint-url=http://localhost:4566 --region us-east-1"
 
 echo ">>> Criando bucket S3..."
 $AWS s3 mb s3://discursiva-submissions || true
 
-echo ">>> Criando DLQ..."
+echo ">>> Criando fila DLQ..."
 $AWS sqs create-queue \
   --queue-name corrections-dlq \
   --attributes MessageRetentionPeriod=86400
@@ -24,8 +24,9 @@ cat > /tmp/sqs-attrs.json <<EOF
   "RedrivePolicy": "{\"deadLetterTargetArn\":\"$DLQ_ARN\",\"maxReceiveCount\":\"3\"}"
 }
 EOF
+
 $AWS sqs create-queue \
   --queue-name corrections-queue \
   --attributes file:///tmp/sqs-attrs.json
 
-echo ">>> LocalStack init concluído."
+echo ">>> LocalStack inicializado com sucesso."

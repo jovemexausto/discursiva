@@ -2,7 +2,6 @@ __pycache__/
 *.py[cod]
 .venv/
 .env
-.env.local
 *.egg-info/
 dist/
 .pytest_cache/
@@ -11,3 +10,4 @@ node_modules/
 .localstack/
 .serverless/
 .DS_Store
+requirements.txt
