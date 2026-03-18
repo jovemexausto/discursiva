@@ -17,44 +17,63 @@ from collections import Counter
 from discursiva_domain.value_objects import Score
 
 
-def compute_score(text: str) -> Score:
-    words = re.findall(r"\b\w+\b", text.lower())
-    total = len(words)
-    points = 0.0
+def _score_length(total_words: int) -> float:
+    if total_words >= 50:
+        return 2.0
+    if total_words >= 25:
+        return 1.0
+    return 0.0
 
-    # 1. Comprimento
-    if total >= 50:
-        points += 2.0
-    elif total >= 25:
-        points += 1.0
 
-    # 2. Parágrafos
+def _score_paragraphs(text: str) -> float:
     paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
-    if len(paragraphs) >= 3:
-        points += 2.0
-    elif len(paragraphs) >= 2:
-        points += 1.0
+    num_paragraphs = len(paragraphs)
+    if num_paragraphs >= 3:
+        return 2.0
+    if num_paragraphs >= 2:
+        return 1.0
+    return 0.0
 
-    # 3. Vocabulário rico
+
+def _score_vocabulary(words: list[str]) -> float:
     complex_words = [w for w in words if len(w) >= 7]
-    if len(complex_words) >= 5:
-        points += 2.0
-    elif len(complex_words) >= 2:
-        points += 1.0
+    num_complex = len(complex_words)
+    if num_complex >= 5:
+        return 2.0
+    if num_complex >= 2:
+        return 1.0
+    return 0.0
 
-    # 4. Pontuação
+
+def _score_punctuation(text: str) -> float:
     punct = len(re.findall(r"[.!?,;:]", text))
     if punct >= 3:
-        points += 2.0
-    elif punct >= 1:
-        points += 1.0
+        return 2.0
+    if punct >= 1:
+        return 1.0
+    return 0.0
 
-    # 5. Diversidade lexical
-    if total > 0:
-        top_freq = Counter(words).most_common(1)[0][1] / total
-        if top_freq < 0.10:
-            points += 2.0
-        elif top_freq < 0.20:
-            points += 1.0
+
+def _score_lexical_diversity(words: list[str], total_words: int) -> float:
+    if total_words == 0:
+        return 0.0
+    top_freq = Counter(words).most_common(1)[0][1] / total_words
+    if top_freq < 0.10:
+        return 2.0
+    if top_freq < 0.20:
+        return 1.0
+    return 0.0
+
+
+def compute_score(text: str) -> Score:
+    words = re.findall(r"\b\w+\b", text.lower())
+    total_words = len(words)
+    points = sum([
+        _score_length(total_words),
+        _score_paragraphs(text),
+        _score_vocabulary(words),
+        _score_punctuation(text),
+        _score_lexical_diversity(words, total_words),
+    ])
 
     return Score(round(min(points, 10.0), 2))
